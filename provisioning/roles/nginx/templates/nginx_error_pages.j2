@@ -1,0 +1,9 @@
+{% for error in nginx_error_codes %}
+## CODE {{ error.code }}
+error_page {{ error.code }} /{{ error.code }}.html;
+location  /{{ error.code }}.html {
+  internal;
+  root {{ nginx_error_pages_root }};
+}
+
+{% endfor %}

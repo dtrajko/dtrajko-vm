@@ -1,0 +1,96 @@
+- name: install mariadb
+  dnf:
+    name: '{{ item }}'
+    state: latest
+  with_items:
+    - mariadb
+    - mariadb-server
+    - python-mysql
+
+- name: generate my.cnf
+  template:
+    src: 'my_cnf.j2'
+    dest: '/etc/my.cnf'
+
+- block:
+  - name: generate systemd mysql_multi service
+    template:
+      src: 'mysqld_service.j2'
+      dest: '{{ mysql_service_path }}'
+
+  - name: generate /root/.my.cnf
+    template:
+      src: 'my_cnf_client.j2'
+      dest: '/root/.my.cnf'
+
+  - name: Create dir /etc/systemd/system/mariadb.service.d
+    file:
+      path: /etc/systemd/system/mariadb.service.d
+      state: directory
+
+  - name: generate /etc/systemd/system/mariadb.service.d/limits.conf
+    template:
+      src: 'limits.conf.j2'
+      dest: /etc/systemd/system/mariadb.service.d/limits.conf
+
+  - name: ensure mysql daemon is running
+    service:
+      name: 'mariadb'
+      state: started
+
+  - name: set root@127.0.0.1 user password
+    mysql_user:
+      name: 'root'
+      host: '127.0.0.1'
+      password: '{{ mariadb_root_password }}'
+      login_user: 'root'
+      login_host: 'localhost'
+      # login_password: ''
+      login_password: '{{ mariadb_root_password }}' # ''
+      check_implicit_admin: 'yes'
+      state: present
+
+  - name: set root@localhost user password
+    mysql_user:
+      name: 'root'
+      host: 'localhost'
+      password: '{{ mariadb_root_password }}'
+      login_user: 'root'
+      login_host: '127.0.0.1'
+      login_password: '{{ mariadb_root_password }}'
+      check_implicit_admin: 'yes'
+      state: present
+
+  - name: set mysql user '{{ mysql_username }}', grant all permissions for all hosts
+    mysql_user:
+      name: '{{ mysql_username }}'
+      host: '%'
+      password: '{{ mysql_password }}'
+      login_user: 'root'
+      login_host: '127.0.0.1'
+      login_password: '{{ mariadb_root_password }}'
+      priv: '*.*:ALL,GRANT'
+      state: present
+
+  - name: ensure we have new root password in /root/.my.cnf
+    lineinfile:
+      dest: '/root/.my.cnf'
+      line: 'password={{ mariadb_root_password }}'
+      regexp: '^password'
+      state: present
+      create: true
+
+  - name: Remove anonymous users
+    mysql_user:
+      name: ''
+      state: absent
+
+  - name: drop test database if exist
+    mysql_db:
+      db: 'test'
+      state: absent
+
+  - name: enable mariadb service
+    service:
+      name: 'mariadb'
+      enabled: yes

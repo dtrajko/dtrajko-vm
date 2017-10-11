@@ -1,0 +1,19 @@
+---
+
+- name: install phpMyAdmin
+  dnf:
+    name: phpMyAdmin
+    state: latest
+
+- name: link phpMyAdmin install to www folder
+  file:
+    src: /usr/share/phpMyAdmin
+    dest: "{{ nginx_default_root }}/phpmyadmin"
+    state: link
+
+- name: Replace 'localhost' with '127.0.0.1' in phpMyAdmin config file
+  lineinfile:
+    path: /etc/phpMyAdmin/config.inc.php
+    regexp: "^(.*)localhost(.*)MySQL hostname or IP address$"
+    line: "$cfg['Servers'][$i]['host']          = '127.0.0.1'; // MySQL hostname or IP address"
+    backup: yes

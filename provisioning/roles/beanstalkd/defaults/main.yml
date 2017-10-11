@@ -1,0 +1,5 @@
+---
+# environment variables for beanstalk
+
+beanstalkd_bin: '/usr/bin/beanstalkd'
+beanstalkd_waldir: '/home/beanstalkd/beanstalkdwaldir'

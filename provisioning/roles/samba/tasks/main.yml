@@ -1,0 +1,25 @@
+- name: dnf install samba
+  dnf:
+    name: samba
+    state: present
+
+- name: configure /etc/samba/smb.conf
+  template: >
+    src=smb_conf.j2
+    dest=/etc/samba/smb.conf
+    owner=root
+    group=root
+    mode=644
+
+- name: Supplying a password for the samba user
+  expect:
+    command: "smbpasswd -L -a {{ samba_username }}"
+    responses:
+      "New SMB password:": "{{ samba_password }}"
+      "Retype new SMB password:": "{{ samba_password }}"
+
+- name: restart smb
+  service: name=smb state=restarted enabled=yes
+
+- name: restart nmb
+  service: name=nmb state=restarted enabled=yes

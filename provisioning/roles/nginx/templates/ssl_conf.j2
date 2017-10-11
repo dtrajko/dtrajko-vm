@@ -1,0 +1,25 @@
+  # load SSL certs
+  ssl_certificate     ssl/{{ item.ssl_domain }}.crt;
+  ssl_certificate_key ssl/{{ item.ssl_domain }}.key;
+
+  # enable session resumption - http://goo.gl/RnJHZ4
+  ssl_session_cache   shared:SSL:10m;
+  ssl_session_timeout 10m;
+
+  # select ssl protocols
+  ssl_protocols TLSv1 TLSv1.1 TLSv1.2;
+
+  # slaying the BEAST - http://goo.gl/uyr0Ll
+  ssl_prefer_server_ciphers on;
+
+  # disables all weak ciphers but keep compatibility with old browsers
+  ssl_ciphers "ECDH+AESGCM:DH+AESGCM:ECDH+AES256:DH+AES256:ECDH+AES128:DH+AES:ECDH+3DES:DH+3DES:RSA+AESGCM:RSA+AES:RSA+3DES:!aNULL:!MD5:!DSS";
+  ssl_dhparam {{ nginx_ssl_dhparm_cert }};
+
+  # tell browsers that we support additional protocols
+  add_header Alternate-Protocol  443:npn-spdy/2;
+  add_header Alternate-Protocol  443:npn-spdy/3;
+  add_header Alternate-Protocol  443:npn-spdy/3.1;
+
+  # hsts header
+  add_header Strict-Transport-Security "max-age=31536000";

@@ -1,0 +1,24 @@
+---
+
+# tasks for beanstalk
+
+- name: Install beanstalkd
+  dnf:
+    name: beanstalkd
+    state: present
+
+- name: Run the beanstalkd service
+  shell: "{{ beanstalkd_bin }} -b {{ beanstalkd_waldir }} -f 1000 -z 1048576 -u beanstalkd &"
+  become: true
+  become_method: sudo
+
+- name: generate /usr/lib/systemd/system/beanstalkd.service
+  template:
+    src: 'beanstalkd.service.j2'
+    dest: '/usr/lib/systemd/system/beanstalkd.service'
+
+- name: enable service beanstalkd.service
+  systemd:
+    name: beanstalkd.service
+    enabled: yes
+    masked: no

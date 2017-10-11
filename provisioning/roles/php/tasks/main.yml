@@ -1,0 +1,143 @@
+---
+# -- PHP_BLOCK_BEGIN -- #
+- block:
+  - name: set default php service handler
+    set_fact:
+      php_handler: 'php'
+
+  - name: ensure all php packages are installed
+    dnf:
+      name: '{{ item }}'
+      state: latest
+    with_items: '{{ php_packages }}'
+    tags:
+      - php-install
+
+  when: php_version == '7'
+# -- PHP_BLOCK_END -- #
+
+- name: install extra php packages
+  dnf:
+    name: '{{ item }}'
+    state: installed
+  with_items: '{{ php_extra_packages }}'
+  when: php_extra_packages is defined
+  tags:
+    - php-install
+
+- name: configure php php.ini
+  template:
+    src: 'php_ini.j2'
+    dest: '/etc/php.ini'
+  tags:
+    - php-configure
+  notify:
+    - restart {{ php_handler }}
+
+- name: configure php-fpm
+  template:
+    src: 'fpm_php_conf.j2'
+    dest: '/etc/php-fpm.conf'
+  tags:
+    - php-configure
+  notify:
+    - restart {{ php_handler }}
+
+- name: php | configure php fpm pool
+  template:
+    src: 'fpm_php_pool.j2'
+    dest: '/etc/php-fpm.d/pool.conf'
+  tags:
+    - php-configure
+  notify:
+    - restart {{ php_handler }}
+
+- name: remove default pool config
+  file:
+    path: '/etc/php-fpm.d/www.conf'
+    state: absent
+  notify:
+    - restart {{ php_handler }}
+
+- name: create php-fpm log directory
+  file:
+    path: '/var/log/php-fpm'
+    owner: '{{ php_fpm_user }}'
+    group: '{{ php_fpm_user }}'
+    state: directory
+
+- stat:
+    path: '/etc/php.d/10-opcache.ini'
+  register: optional_file
+
+- lineinfile:
+    dest: '/etc/php.d/10-opcache.ini'
+    regexp: '^opcache.max_accelerated_files='
+    line: ';opcache.max_accelerated_files=4000'
+  when: optional_file.stat.exists
+
+- stat:
+    path: '/etc/php-zts.d/10-opcache.ini'
+  register: optional_file2
+
+- lineinfile:
+    dest: '/etc/php-zts.d/10-opcache.ini'
+    regexp: '^opcache.max_accelerated_files='
+    line: ';opcache.max_accelerated_files=4000'
+  when: optional_file2.stat.exists
+
+- name: check if 40-memcache.ini exists
+  stat:
+    path: '/etc/php.d/40-memcache.ini'
+  register: memcache_postoji
+
+- name: if 40-memcache.ini exists and memcache_hash_straregy is set, set it in ini
+  lineinfile:
+    dest: '/etc/php.d/40-memcache.ini'
+    regexp: '^memcache.hash_strategy='
+    line: 'memcache.hash_strategy={{ memcache_hash_strategy }}'
+  when: memcache_postoji.stat.exists and memcache_hash_strategy is defined
+
+- name: check if 15-xdebug.ini exists
+  stat:
+    path: '/etc/php.d/15-xdebug.ini'
+  register: xdebug_ini
+
+- name: if 15-xdebug.ini exists, set xdebug.idekey = phpstorm
+  lineinfile:
+    dest: '/etc/php.d/15-xdebug.ini'
+    regexp: '^xdebug.idekey ='
+    line: 'xdebug.idekey = phpstorm'
+  when: xdebug_ini.stat.exists
+
+- name: enable tideways repo
+  yum_repository:
+    name: tideways_repository
+    description: tideways profiling
+    baseurl: https://s3-eu-west-1.amazonaws.com/qafoo-profiler/rpm
+    gpgkey: https://s3-eu-west-1.amazonaws.com/qafoo-profiler/packages/EEB5E8F4.gpg
+    gpgcheck: yes
+    enabled: on
+  when: php_tideways == 'on'
+  tags:
+    - php-install
+
+- name: configure tideways 40-tideways.ini
+  template:
+    src: '40-tideways.ini.j2'
+    dest: '/etc/php.d/40-tideways.ini'
+  tags:
+    - php-configure
+  when: php_tideways == 'on'
+
+- name: install tideways from enabled repo
+  dnf:
+    name: 'tideways-php'
+    state: present
+  when: php_tideways == 'on'
+
+- name: run php-fpm service ('sudo systemctl start php-fpm.service')
+  systemd:
+    name: php-fpm.service
+    state: started
+    enabled: yes

@@ -1,0 +1,15 @@
+{% for section,options in mysql_config.iteritems() %}
+
+[{{ section }}]
+{% for option in options %}
+{% if option is mapping -%}
+{% for key, value in option.items() %}
+{{ key }}{% if value is not none %}={{ value }}{% endif %}
+{% endfor %}
+
+{% else -%}
+{{ option }}
+{% endif %}
+{% endfor -%}
+
+{% endfor %}

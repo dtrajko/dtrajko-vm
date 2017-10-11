@@ -1,0 +1,12 @@
+[Unit]
+Description=Beanstalkd Fast Workqueue Service
+After=local-fs.target network.target
+
+[Service]
+User=beanstalkd
+Type=simple
+ExecStart={{ beanstalkd_bin }} -b {{ beanstalkd_waldir }} -f 1000 -z 1048576 -u beanstalkd
+Restart=always
+
+[Install]
+WantedBy=multi-user.target

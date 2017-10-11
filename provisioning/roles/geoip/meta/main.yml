@@ -1,0 +1,26 @@
+---
+galaxy_info:
+  author: Jonathan Strootman
+  description: Installs the GeoLiteCity database.
+  company: CyVerse
+  license: "license (BSD)"
+  min_ansible_version: 2.0
+  platforms:
+  - name: EL
+    versions:
+    - all
+  - name: Ubuntu
+    versions:
+    - all
+  - name: Debian
+    versions:
+    - all
+  galaxy_tags: 
+      - elasticsearch
+      - geoip
+      - beats
+      - packetbeat
+      - logstash
+
+dependencies: []
+

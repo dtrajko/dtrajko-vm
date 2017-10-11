@@ -1,0 +1,55 @@
+{% if item.ssl_domain is defined -%}
+server {
+  server_name .{{ item.name }};
+  rewrite ^(.*) https://{{ item.name }}$1 permanent;
+}
+{% endif %}
+
+server {
+{% if item.ssl_domain is defined %}
+  listen {{ nginx_server_address }}:{{ nginx_server_https_port }} ssl http2;
+  server_name .{{ item.name }} ssl;
+  include ssl.conf;
+{% else %}
+  listen {{ nginx_server_address }}:{{ nginx_server_http_port }};
+  server_name .{{ item.name }};
+{% endif %}
+
+  index index.php index.html;
+
+  # Enable php
+  include php.conf;
+
+  # Add security headers
+  include security.conf;
+
+  # Static files
+  location ~* \.(jpg|jpeg|gif|png|css|js|ico|xml)$ {
+    access_log        off;
+    log_not_found     off;
+    expires           360d;
+  }
+
+  # Deny access to hidden files
+  location ~ /\. {
+    access_log off;
+    log_not_found off;
+    deny all;
+  }
+
+  location / {
+    limit_req zone=one burst=10 nodelay;
+    root {{ item.root }};
+    index index.php index.html;
+  }
+
+  # Custom error pages
+  include error_pages.conf;
+
+  # Logging
+  access_log /var/log/nginx/{{ item.name }}.access.log main;
+  error_log  /var/log/nginx/{{ item.name }}.error.log info;
+
+  # Domain root directory
+  root {{ item.root }};
+} 

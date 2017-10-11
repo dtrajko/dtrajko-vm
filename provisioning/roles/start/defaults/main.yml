@@ -1,0 +1,25 @@
+---
+
+gui_enabled: '{{ vm_gui_enabled | default(true) }}'
+p_env_code: 'local'
+php_home: '/usr/bin'
+vm_hostname: '{{ vm_hostname }}'
+dtrajko_password: 'dtrajko'
+root_password: 'vagrant'
+gid_start: 1004
+uid_start: 1004
+workspace_dir: '/home/dtrajko/workspace'
+samba_username: 'dtrajko'
+samba_group: 'dtrajko'
+samba_password: 'dtrajko'
+mysql_username: 'dtrajko'
+mysql_password: 'dtrajko'
+nginx_log_dir: '/var/log/nginx'
+nginx_default_root: '/var/www/html'
+vm_setup_dir: '/home/dtrajko/vm_setup'
+sphinx_username: 'dtrajko'
+sphinx_group: 'dtrajko'
+sphinx_var_dir: '/home/dtrajko/var'
+sphinx_bin_dir: '/usr/bin'
+memcached_port: 11211
+memcached_listen_ip: 127.0.0.1

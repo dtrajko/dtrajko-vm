@@ -1,0 +1,70 @@
+---
+
+- ping:
+
+- name: Include personal variables
+  include_vars:
+    file: personal.yml
+    name: personal
+
+- name: Create dir {{ workspace_dir }}
+  file:
+    path: "{{ workspace_dir }}"
+    state: directory
+    owner: dtrajko
+    group: dtrajko
+    mode: 0755
+
+- name: "Create dir {{ vm_setup_dir }}"
+  file:
+    path: "{{ vm_setup_dir }}"
+    state: directory
+    owner: dtrajko
+    group: dtrajko
+    mode: 0755
+
+- name: Create dir /home/beanstalkd/beanstalkdwaldir
+  file:
+    path: /home/beanstalkd/beanstalkdwaldir
+    state: directory
+    owner: beanstalkd
+    group: dtrajko
+    mode: 0775
+
+- name: Add a few environment variables to ~/.bashrc for user dtrajko
+  lineinfile:
+    path: /home/dtrajko/.bashrc
+    line: "{{ item.line }}"
+    backup: yes
+    state: present
+    insertafter: EOF
+  with_items:
+    - { line: "\n" }
+    - { line: "export PHP_HOME=/usr/bin/" }
+    - { line: "export P_ENV_CODE={{ p_env_code }}" }
+
+- name: Add entries to /etc/hosts
+  lineinfile:
+    path: /etc/hosts
+    line: "{{ item.line }}"
+#   backup: yes
+    state: present
+    insertafter: EOF
+  with_items:
+    - { line: "\n" }
+    - { line: '127.0.0.1  phpmyadmin.localhost' }
+
+- name: Increase ulimit values by adding entries to /etc/security/limits.conf
+  lineinfile:
+    path: /etc/security/limits.conf
+    line: "{{ item.line }}"
+    backup: yes
+    state: present
+    insertafter: EOF
+  with_items:
+    - { line: "\n" }
+    - { line: "\n" }
+    - { line: '* soft nofile 1024000' }
+    - { line: '* hard nofile 1024000' }
+    - { line: '* soft nproc 10240' }
+    - { line: '* hard nproc 10240' }

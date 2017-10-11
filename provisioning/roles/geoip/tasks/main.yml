@@ -1,0 +1,29 @@
+# tasks file for ansible-geoip
+---
+- stat: "path={{ geo_ip_folder }}/GeoLiteCity.dat"
+  register: geo_st
+
+- when: (geo_ip_override | default(false)) or (geo_st.stat.exists is defined and not geo_st.stat.exists)
+  block:
+   - name: Download GeoLite City database
+     get_url: "url={{ geo_ip_url }} dest=/tmp timeout=600"
+     register: download_geolite
+     tags:
+         - geoip
+
+   - name: Ensure that GeoIP folder exists
+     file: "path={{ geo_ip_folder }} state=directory mode=0755"
+     tags:
+         - geoip
+
+   - name: Unpack GeoLite database
+     shell: "gunzip {{download_geolite.dest}} && mv /tmp/GeoLiteCity.dat {{ geo_ip_folder }}/"
+     when: not ansible_check_mode
+     tags:
+         - geoip
+
+   - name: Create a symlink GeoIPCity.dat => GeoLiteCity.dat
+     file:
+       src: "{{ geo_ip_folder }}/GeoLiteCity.dat"
+       dest: "{{ geo_ip_folder }}/GeoIPCity.dat"
+       state: link

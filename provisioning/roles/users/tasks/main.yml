@@ -1,0 +1,121 @@
+---
+- name: create dtrajko group
+  group:
+    name: dtrajko
+    gid: "{{ gid_start }}"
+    state: present
+- name: create apache group
+  group:
+    name: apache
+    gid: "{{ gid_start + 4 }}"
+    state: present
+- name: create memcached group
+  group:
+    name: memcached
+    gid: "{{ gid_start + 8 }}"
+    state: present
+- name: create mysql group
+  group:
+    name: mysql
+    gid: "{{ gid_start + 12 }}"
+    state: present
+- name: create user dtrajko
+  user:
+    name: dtrajko
+    uid: "{{ uid_start }}"
+    group: dtrajko
+    groups:
+      - apache
+      - vagrant
+    home: /home/dtrajko
+    state: present
+- name: create user apache
+  user:
+    name: apache
+    uid: "{{ uid_start + 4 }}"
+    group: apache
+    groups:
+      - dtrajko
+    home: /home/apache
+    shell: /sbin/nologin
+    state: present
+- name: create user beanstalkd
+  user:
+    name: beanstalkd
+    uid: "{{ uid_start + 8 }}"
+    group: dtrajko
+    home: /home/beanstalkd
+    shell: /sbin/nologin
+    state: present
+- name: create user memcached
+  user:
+    name: memcached
+    uid: "{{ uid_start + 12 }}"
+    group: memcached
+    shell: /sbin/nologin
+    state: present
+- name: create user mysql
+  user:
+    name: mysql
+    uid: "{{ uid_start + 16 }}"
+    group: mysql
+    shell: /sbin/nologin
+    state: present
+- name: Add users vagrant and dtrajko to sudoers, no password required 
+  lineinfile:
+    path: /etc/sudoers
+    line: "{{ item.line }}"
+    backup: yes
+    state: present
+    insertafter: EOF
+  with_items:
+    - { line: '' }
+    - { line: 'vagrant  ALL=(ALL)  NOPASSWD:ALL' }
+    - { line: 'dtrajko  ALL=(ALL)  NOPASSWD:ALL' }
+
+- name: 'Create dir /home/dtrajko/.ssh'
+  file:
+    path: /home/dtrajko/.ssh
+    state: directory
+    owner: dtrajko
+    group: dtrajko
+    mode: 0700
+
+- name: Add public key for user dtrajko
+  copy:
+    src: files/ssh/id_rsa.pub
+    dest: /home/dtrajko/.ssh/id_rsa.pub
+    owner: dtrajko
+    group: dtrajko
+    mode: 0600
+
+- name: Set authorized key for user dtrajko
+  authorized_key:
+    user: dtrajko
+    state: present
+    key: "{{ lookup('file', 'files/ssh/id_rsa.pub') }}"
+
+- name: Set the proper SSH permissions for the authorized_keys file
+  file:
+    path: /home/dtrajko/.ssh/authorized_keys
+    owner: dtrajko
+    group: dtrajko
+    mode: 0600
+
+- name: Set a password for user 'root'
+  expect:
+    command: passwd
+    responses:
+      "New password:": "{{ root_password }}"
+      "Retype new password:": "{{ root_password }}"
+  become: true
+  become_user: root
+
+- name: Set a password for user 'dtrajko'
+  expect:
+    command: passwd dtrajko
+    responses:
+      "New password:": "{{ dtrajko_password }}"
+      "Retype new password:": "{{ dtrajko_password }}"
+  become: true
+  become_user: root

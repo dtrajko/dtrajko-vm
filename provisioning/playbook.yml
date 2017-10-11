@@ -1,0 +1,21 @@
+---
+- hosts: all
+  become: true
+  remote_user: vagrant
+
+  roles:
+    - start
+    - users
+    - system
+    - samba
+    - nfs
+    - gui
+    - mariadb
+    - php
+    - phpmyadmin
+    - nginx
+    - sphinx
+    - memcached
+    - beanstalkd
+    - geoip
+    - finish

@@ -1,0 +1,184 @@
+;; ANSIBLE: AUTO-GENERATED FILE. DO NOT MODIFY.
+
+[PHP]
+allow_url_fopen = On
+allow_url_include = Off
+always_populate_raw_post_data = -1
+apc.shm_size = 1G
+apc.gc_ttl = {{ php_ini_options.apc_gc_ttl | default('3600') }}
+asp_tags = Off
+auto_append_file =
+auto_globals_jit = On
+auto_prepend_file =
+default_charset = "UTF-8"
+default_mimetype = "text/html"
+default_socket_timeout = {{ php_ini_options.default_socket_timeout | default('600') }}
+disable_classes =
+disable_functions =
+display_errors = Off
+display_startup_errors = Off
+doc_root =
+enable_dl = Off
+engine = On
+error_log = /var/log/php-fpm/php-fpm.log
+error_reporting = E_ALL & ~E_DEPRECATED & ~E_STRICT
+expose_php = Off
+file_uploads = On
+html_errors = On
+ignore_repeated_errors = Off
+ignore_repeated_source = Off
+implicit_flush = Off
+log_errors = On
+log_errors_max_len = 1024
+max_execution_time = 300
+max_file_uploads = 20
+max_input_time = 60
+max_input_vars = 10000
+memory_limit = 1024M
+output_buffering = 4096
+post_max_size = 512M
+precision = 14
+register_argc_argv = Off
+report_memleaks = On
+request_order = "GP"
+serialize_precision = 17
+short_open_tag = On
+track_errors = Off
+unserialize_callback_func =
+upload_max_filesize = 512M
+user_dir =
+variables_order = "GPCS"
+zend.enable_gc = On
+{% if php_ini_options.zend_extension is defined %}
+zend_extension = {{ php_ini_options.zend_extension }}
+{% endif %}
+zlib.output_compression = Off
+
+realpath_cache_size = {{ php_ini_options.realpath_cache_size | default('16k') }}
+
+[CLI Server]
+cli_server.color = On
+
+[Date]
+date.timezone = {{ php_ini_options.date_timezone | default('UTC') }}
+
+[Pdo_mysql]
+pdo_mysql.cache_size = 2000
+pdo_mysql.default_socket=
+
+[mail function]
+SMTP = localhost
+smtp_port = 25
+mail.add_x_header = On
+
+[SQL]
+sql.safe_mode = Off
+
+[MySQL]
+mysql.allow_local_infile = On
+mysql.allow_persistent = On
+mysql.cache_size = 2000
+mysql.max_persistent = -1
+mysql.max_links = -1
+mysql.default_port =
+mysql.default_socket =
+mysql.default_host =
+mysql.default_user =
+mysql.default_password =
+mysql.connect_timeout = 60
+mysql.trace_mode = Off
+
+[MySQLi]
+mysqli.max_persistent = -1
+mysqli.allow_persistent = On
+mysqli.max_links = -1
+mysqli.cache_size = 2000
+mysqli.default_port = 3306
+mysqli.default_socket =
+mysqli.default_host =
+mysqli.default_user =
+mysqli.default_pw =
+mysqli.reconnect = Off
+
+[mysqlnd]
+mysqlnd.collect_statistics = On
+mysqlnd.collect_memory_statistics = Off
+
+[bcmath]
+bcmath.scale = 0
+
+[Session]
+session.auto_start = 0
+session.cache_expire = 180
+session.cache_limiter = nocache
+session.cookie_domain =
+session.cookie_httponly = {{ php_ini_options.session_cookie_httponly | default('On') }}
+session.cookie_lifetime = 0
+session.cookie_path = /
+session.cookie_secure = {{ php_ini_options.session_cookie_secure | default('Off') }}
+session.entropy_length = 512
+session.gc_divisor = {{ php_ini_options.session_gc_divisor | default('100') }}
+session.gc_maxlifetime = {{ php_ini_options.session_gc_maxlifetime | default('1440') }}
+session.gc_probability = 1
+session.hash_bits_per_character = 5
+session.hash_function = {{ php_ini_options.session_hash_function | default('whirlpool') }}
+
+session.name = {{ php_ini_options.session_name | default('PHPSESSID') }}
+session.referer_check =
+session.save_handler = {{ php_ini_options.session_save_handler | default('files') }}
+session.save_path = {{ php_ini_options.session_save_path | default('/tmp') }}
+session.serialize_handler = php
+session.use_cookies = 1
+session.use_only_cookies = 1
+session.use_strict_mode = {{ php_ini_options.session_use_strict_mode | default('On') }}
+session.use_trans_sid = 0
+url_rewriter.tags = "a=href,area=href,frame=src,input=src,form=fakeentry"
+
+[Tidy]
+tidy.clean_output = Off
+
+[ldap]
+ldap.max_links = -1
+
+[opcache]
+opcache.enable = Off
+opcache.enable_cli = 0
+opcache.fast_shutdown = 0
+opcache.interned_strings_buffer = 8
+opcache.max_accelerated_files = {{ php_ini_options.opcache_max_accelerated_files | default('4000') }}
+opcache.memory_consumption = 256
+opcache.optimization_level = 0
+opcache.revalidate_freq = {{ php_ini_options.opcache_revalidate_freq | default('60') }}
+; important
+opcache.validate_timestamps = {{ php_ini_options.opcache_validate_timestamps | default('1') }} 
+opcache.enable_file_override = {{ php_ini_options.opcache_enable_file_override | default('off') }}
+opcache.save_comments = {{ php_ini_options.opcache_save_comments | default('1') }}
+
+
+[Assertion]
+[COM]
+[Pcre]
+[Pdo]
+[Phar]
+[browscap]
+[curl]
+[dba]
+[exif]
+[filter]
+[gd]
+[iconv]
+[intl]
+[mbstring]
+[mcrypt]
+[openssl]
+[sqlite3]
+[sqlite]
+[sysvshm]
+
+{% if php_ini_extra_options is defined %}
+{% for extra_option in php_ini_extra_options %}
+{{ extra_option }}
+{% endfor %}
+{% endif %}
+
+;; {{ ansible_managed }}

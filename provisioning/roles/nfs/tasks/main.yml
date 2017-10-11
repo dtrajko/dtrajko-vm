@@ -1,0 +1,20 @@
+---
+
+- name: install nfs-utils
+  dnf:
+    name: nfs-utils
+    state: latest
+
+- name: Add nfs exports definition settings
+  lineinfile:
+    path: /etc/exports
+    line: "{{ workspace_dir }} *(rw,all_squash,insecure,async,no_subtree_check,anonuid={{ uid_start + 12 }},anongid={{ gid_start }})"
+    backup: no
+    state: present
+    insertafter: EOF
+
+- name: restart rpcbind
+  service: name=rpcbind state=restarted enabled=yes
+
+- name: restart nfs-server
+  service: name=nfs-server state=restarted enabled=yes

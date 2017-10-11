@@ -1,0 +1,31 @@
+server {
+    server_name phpmyadmin.*;
+    include listen_port.conf;
+    root {{ nginx_default_root }}/phpmyadmin;
+
+    error_log  {{ nginx_log_dir }}/phpmyadmin.error.log;
+    access_log {{ nginx_log_dir }}/phpmyadmin.access.log main;
+
+    ssl_certificate             {{ nginx_basedir }}/ssl/{{ vm_hostname }}.crt;
+    ssl_certificate_key         {{ nginx_basedir }}/ssl/{{ vm_hostname }}.key;
+    ssl_trusted_certificate     {{ nginx_basedir }}/ssl/{{ vm_hostname }}.crt;
+
+	include ssl_common.conf;
+
+    location / {
+        index  index.php;
+    }
+    ## Images and static content is treated different
+    location ~* ^.+.(jpg|jpeg|gif|css|png|js|ico|xml)$ {
+        access_log  off;
+        expires     360d;
+    }
+    location ~ /\.ht {
+        deny  all;
+    }
+    location ~ /(libraries|setup/frames|setup/libs) {
+        deny all;
+        return 404;
+    }
+    include php.conf;
+}

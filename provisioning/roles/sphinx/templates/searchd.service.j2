@@ -1,0 +1,12 @@
+[Unit]
+Description=Sphinx - SQL Full Text Search Engine
+After=local-fs.target network.target
+
+[Service]
+User={{ sphinx_username }}
+Type=forking
+PIDFile={{ sphinx_var_dir }}/log/searchd.pid
+ExecStart={{ sphinx_bin_dir }}/searchd --version
+
+[Install]
+WantedBy=multi-user.target

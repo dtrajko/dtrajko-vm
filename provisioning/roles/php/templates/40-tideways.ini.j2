@@ -1,0 +1,12 @@
+extension={{ php_tideways_extension | default('tideways.so') }}
+{% if php_tideways_api_key is defined %}
+tideways.api_key="{{ php_tideways_api_key }}"
+{% endif %}
+
+{% if php_tideways_sample_rate is defined %}
+tideways.sample_rate="{{ php_tideways_sample_rate }}"
+{% endif %}
+
+{% if php_tideways_auto_prepend_library is defined %}
+tideways.auto_prepend_library="{{ php_tideways_auto_prepend_library }}"
+{% endif %}

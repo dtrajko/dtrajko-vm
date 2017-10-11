@@ -1,0 +1,21 @@
+---
+
+# install desktop-environment
+
+- name: Install desktop-environment
+  dnf:
+    name: "@workstation-product-environment"
+    state: present
+  when: gui_enabled
+
+- name: systemctl set-default graphical.target
+  shell: "systemctl set-default graphical.target"
+  when: gui_enabled
+
+- name: enable service gdm.service
+  systemd:
+    name: gdm.service
+    enabled: yes
+    masked: no
+    state: started
+  when: gui_enabled

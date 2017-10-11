@@ -1,0 +1,44 @@
+---
+
+- name: upgrade all packages
+  dnf:
+    name: '*'
+    state: latest
+
+- name: upgrade kernel packages
+  dnf:
+    name: 'kernel*'
+    state: latest
+
+- name: Set the hostname of the virtual machine
+  shell: "hostnamectl set-hostname --static {{ vm_hostname }}"
+
+- name: Install various libs via dnf
+  dnf:
+    name: "{{item}}"
+    state: present
+  with_items:
+    - libselinux-python
+    - python2-pexpect
+    - java
+    - ant
+    - vim
+    - wget
+    - telnet
+    - ImageMagick
+    - mod_dav_svn
+    - subversion
+    - git-all
+    - php-xdebug
+    - fabric
+    - mc
+    - mlocate
+
+- name: set timezone to America/New_York
+  timezone:
+    name: America/New_York
+
+- name: Put SELinux in permissive mode, logging actions that would be blocked.
+  selinux:
+    policy: targeted
+    state: permissive

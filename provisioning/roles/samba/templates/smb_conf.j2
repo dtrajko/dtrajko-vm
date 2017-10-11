@@ -1,0 +1,26 @@
+# See smb.conf.example for a more detailed config file or
+# read the smb.conf manpage.
+# Run 'testparm' to verify the config is correct after
+# you modified it.
+
+[global]
+        workgroup = WORKGROUP
+        name resolve order = bcast host lmhosts wins
+        client lanman auth = yes
+        hosts allow = *.*.*.*
+        security = user
+        guest account = {{ samba_username }}
+        null passwords = 1
+        passdb backend = tdbsam
+
+[workspace]
+        path = {{ workspace_dir }}
+        browsable = yes
+        writable = yes
+        guest ok = yes
+        public = yes
+        read only = no
+        force user = {{ samba_username }}
+        force group = {{ samba_group }}
+        create mask = 0666
+        directory mask = 0777

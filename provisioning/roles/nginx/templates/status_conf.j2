@@ -1,0 +1,15 @@
+location ~ ^/(fpm-x-status)$ {
+  access_log off;
+  fastcgi_pass {{ nginx_php_pool_address }}:{{ nginx_php_pool_port }};
+  include php.conf;
+  include fastcgi.conf;
+  allow 127.0.0.1;
+  deny all;
+}
+
+location /server-status {
+  access_log off;
+  stub_status on;
+  allow 127.0.0.1;
+  deny all;
+}

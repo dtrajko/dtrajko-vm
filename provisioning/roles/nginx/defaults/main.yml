@@ -1,0 +1,38 @@
+nginx_basedir: '/etc/nginx'
+nginx_confdir: '{{ nginx_basedir }}/conf.d'
+nginx_user: 'nginx'
+
+nginx_php_pool_address: '127.0.0.1'
+nginx_php_pool_port: '8833'
+
+nginx_server_address: '0.0.0.0'
+nginx_server_http_port: '80'
+nginx_server_https_port: '443'
+nginx_worker_connections: '1024'
+nginx_keepalive_timeout: '75 20'
+
+nginx_error_codes:
+  - { code: '401', desc: 'Unauthorized' }
+  - { code: '403', desc: 'Forbidden' }
+  - { code: '404', desc: 'Page Not Found' }
+  - { code: '405', desc: 'Method Not Allowed' }
+  - { code: '500', desc: 'Internal Server Error' }
+  - { code: '501', desc: 'Not Implemented' }
+  - { code: '502', desc: 'Bad Gateway' }
+  - { code: '503', desc: 'Service Unavailable' }
+  - { code: '504', desc: 'Gateway Timeout' }
+
+nginx_error_pages_root: '/etc/nginx/error_pages'
+nginx_ssl_dhparm_cert: '/etc/ssl/certs/dhparam.pem'
+nginx_default_root: '/var/www/html'
+nginx_domains:
+  - name: '{{ vm_hostname }}'
+    ssl_domain: '{{ vm_hostname }}'
+    vhost: 'default'
+nginx_gzip: 'on'
+nginx_gzip_min_length: '1100'
+nginx_gzip_buffers: '4 8k'
+nginx_gzip_types: 'text/plain text/css application/x-javascript'
+nginx_options:
+  types_hash_max_size: 4096
+  types_hash_bucket_size: 128

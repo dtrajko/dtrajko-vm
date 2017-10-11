@@ -1,0 +1,32 @@
+- name: install sphinx
+  dnf:
+    name: sphinx
+    state: latest
+
+- name: create {{ sphinx_var_dir }}/data & {{ sphinx_var_dir }}/log directories
+  file:
+    path: "{{ item.dir }}"
+    state: directory
+    owner: "{{ sphinx_username }}"
+    group: "{{ sphinx_group }}"
+    mode: 0775
+  with_items:
+    - { dir: '{{ sphinx_var_dir }}' }
+    - { dir: '{{ sphinx_var_dir }}/data' }
+    - { dir: '{{ sphinx_var_dir }}/log' }
+
+#- name: "Run searchd service"
+#  shell: "{{ sphinx_bin_dir }}/searchd --config sphinx.conf"
+#  become: true
+#  become_user: "{{ sphinx_username }}"
+
+- name: generate /usr/lib/systemd/system/searchd.service
+  template:
+    src: 'searchd.service.j2'
+    dest: '/usr/lib/systemd/system/searchd.service'
+
+- name: enable service searchd.service
+  systemd:
+    name: searchd.service
+    enabled: no
+    masked: no

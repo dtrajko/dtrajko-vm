@@ -1,0 +1,159 @@
+---
+- name: install nginx
+  dnf: name=nginx state=latest
+  notify: restart nginx
+
+- name: configure nginx.conf
+  template: >
+    src=nginx_conf.j2
+    dest=/etc/nginx/nginx.conf
+    owner=root
+    group={{ nginx_user }}
+    mode=640
+  notify: restart nginx
+
+- name: create nginx error_pages directory
+  file: >
+    path=/etc/nginx/error_pages
+    state=directory
+    owner={{ nginx_user }}
+    group={{ nginx_user }}
+    mode=755
+  notify: restart nginx
+
+- name: configure error_pages.conf
+  template: >
+    src=nginx_error_pages.j2
+    dest=/etc/nginx/error_pages.conf
+  notify: restart nginx
+
+- name: check if error_pages exists
+  stat:
+    path: '/etc/nginx/error_pages'
+  register: error_codes
+  tags:
+    - nginx-rebuild-error-codes
+
+- name: generate error_pages
+  template:
+    src: 'errors_html.j2'
+    dest: '/etc/nginx/error_pages/{{ item.code }}.html'
+  with_items: '{{ nginx_error_codes }}'
+  when: error_codes.stat.exists == true
+  tags:
+    - nginx-rebuild-error-codes
+
+- name: generate nginx configuration files
+  template:
+    src: '{{ item }}_conf.j2'
+    dest: '/etc/nginx/{{ item }}.conf'
+  with_items:
+    - 'status'
+    - 'php'
+    - 'security'
+
+  notify:
+    - restart nginx
+
+- name: configure ssl.conf
+  template: >
+    src=ssl_conf.j2
+    dest=/etc/nginx/ssl.conf
+  when: item.ssl_domain is defined
+  with_items: '{{ nginx_domains }}'
+  notify: restart nginx
+
+- name: create nginx ssl directory
+  file: >
+    path=/etc/nginx/ssl
+    state=directory
+    owner={{ nginx_user }}
+    group={{ nginx_user }}
+    mode=644
+  notify: restart nginx
+
+- name: copy ssl domains bundle
+  copy: >
+    src={{ item.ssl_domain }}.crt
+    dest=/etc/nginx/ssl/{{ item.ssl_domain }}.crt
+    owner={{ nginx_user }}
+    group={{ nginx_user }}
+    mode=644
+  when: item.ssl_domain is defined
+  with_items: '{{ nginx_domains }}'
+  notify: restart nginx
+
+- name: copy ssl domains private key
+  copy: >
+    src={{ item.ssl_domain }}.key
+    dest=/etc/nginx/ssl/{{ item.ssl_domain }}.key
+    owner={{ nginx_user }}
+    group={{ nginx_user }}
+    mode=644
+  when: item.ssl_domain is defined
+  with_items: '{{ nginx_domains }}'
+  notify: restart nginx
+
+- name: check if DH cert exist
+  stat: path={{ nginx_ssl_dhparm_cert }}
+  register: dh_cert
+
+- name: generate strong DH cert - this will take a while ...
+  shell: openssl dhparam -out {{ nginx_ssl_dhparm_cert }} 1024
+  when: item.ssl_domain is defined and dh_cert.stat.exists == false
+  with_items: '{{ nginx_domains }}'
+
+- name: configure nginx logrotate
+  copy: >
+    src=nginx_logrotate
+    dest=/etc/logrotate.d/nginx
+    group=root
+    mode=644
+
+- name: create default paths
+  file: path={{ item }} state=directory
+  with_items:
+    - '{{ nginx_log_dir }}/old'
+    - '{{ nginx_default_root }}'
+
+- name: create dummy index.html page for IP vhosts
+  copy: >
+    content='{{ ansible_fqdn }}'
+    dest={{ nginx_default_root }}/index.html
+
+- name: remove unused config stuff
+  file: path={{ item }} state=absent
+  with_items:
+    - '{{ nginx_basedir }}/default.d'
+    - '{{ nginx_basedir }}/fastcgi.conf.default'
+    - '{{ nginx_basedir }}/fastcgi_params.default'
+    - '{{ nginx_basedir }}/mime.types.default'
+    - '{{ nginx_basedir }}/nginx.conf.default'
+    - '{{ nginx_basedir }}/scgi_params.default'
+    - '{{ nginx_basedir }}/uwsgi_params.default'
+    - '{{ nginx_confdir }}/php-fpm.conf'
+  ignore_errors: yes
+
+- name: create nginx systemd custom dir
+  file: path=/etc/systemd/system/nginx.service.d owner=root group=root state=directory
+
+- name: create nginx systemd custom LimitNOFILE config
+  copy: content="[Service]\nLimitNOFILE=999999\n" dest="/etc/systemd/system/nginx.service.d/nofile.conf"
+
+- name: generate nginx configuration files in /etc/nginx
+  template:
+    src: '{{ item }}_conf.j2'
+    dest: '/etc/nginx/{{ item }}.conf'
+  with_items:
+    - 'vhosts'
+    - 'listen_port'
+    - 'vhosts_ssl'
+    - 'listen_port_ssl'
+    - 'ssl_common'
+    - 'phpmyadmin'
+
+- command: systemctl daemon-reload
+  notify: restart nginx
+
+- command: systemctl start nginx.service
+  notify: restart nginx

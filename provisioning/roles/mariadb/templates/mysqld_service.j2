@@ -1,0 +1,16 @@
+[Unit]
+Description=MySQL Multi Server for instance %i
+After=syslog.target
+After=network.target
+
+[Service]
+User={{ mysql_user }}
+Group={{ mysql_user }}
+Type=forking
+ExecStart={{ mysqld_multi_path }} start %i
+ExecStop={{ mysqld_multi_path }} stop %i
+Restart=always
+PrivateTmp=true
+
+[Install]
+WantedBy=multi-user.target
