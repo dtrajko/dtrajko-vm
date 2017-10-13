@@ -22,7 +22,7 @@ Vagrant.configure(VAGRANTFILE_API_VERSION) do |config|
     vb.cpus = 2
     vb.name = VM_HOSTNAME
     vb.gui = VM_GUI_ENABLED
-    # vb.customize ["modifyvm", :id, "--natdnshostresolver1", "on"] # fix for "Error: Failed to synchronize cache for repo 'updates"
+    vb.customize ["modifyvm", :id, "--natdnshostresolver1", "on"] # fix for "Error: Failed to synchronize cache for repo 'updates"
   end
 
   # Run Ansible from the Vagrant VM

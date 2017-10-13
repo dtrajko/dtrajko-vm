@@ -33,6 +33,8 @@
     - fabric
     - mc
     - mlocate
+    - npm
+    - nodejs
 
 - name: set timezone to America/New_York
   timezone:

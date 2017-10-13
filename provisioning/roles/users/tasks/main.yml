@@ -36,13 +36,21 @@
     group: apache
     groups:
       - dtrajko
-    home: /home/apache
+    shell: /sbin/nologin
+    state: present
+- name: create user nginx
+  user:
+    name: nginx
+    uid: "{{ uid_start + 8 }}"
+    group: nginx
+    groups:
+      - dtrajko
     shell: /sbin/nologin
     state: present
 - name: create user beanstalkd
   user:
     name: beanstalkd
-    uid: "{{ uid_start + 8 }}"
+    uid: "{{ uid_start + 12 }}"
     group: dtrajko
     home: /home/beanstalkd
     shell: /sbin/nologin
@@ -50,14 +58,14 @@
 - name: create user memcached
   user:
     name: memcached
-    uid: "{{ uid_start + 12 }}"
+    uid: "{{ uid_start + 16 }}"
     group: memcached
     shell: /sbin/nologin
     state: present
 - name: create user mysql
   user:
     name: mysql
-    uid: "{{ uid_start + 16 }}"
+    uid: "{{ uid_start + 20 }}"
     group: mysql
     shell: /sbin/nologin
     state: present
