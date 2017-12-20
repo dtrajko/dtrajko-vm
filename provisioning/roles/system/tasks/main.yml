@@ -11,16 +11,16 @@
   file:
     path: "{{ workspace_dir }}"
     state: directory
-    owner: dtrajko
-    group: dtrajko
+    owner: "{{ owner_username }}"
+    group: "{{ owner_group }}"
     mode: 0755
 
 - name: "Create dir {{ vm_setup_dir }}"
   file:
     path: "{{ vm_setup_dir }}"
     state: directory
-    owner: dtrajko
-    group: dtrajko
+    owner: "{{ owner_username }}"
+    group: "{{ owner_group }}"
     mode: 0755
 
 - name: Create dir /home/beanstalkd/beanstalkdwaldir
@@ -28,12 +28,12 @@
     path: /home/beanstalkd/beanstalkdwaldir
     state: directory
     owner: beanstalkd
-    group: dtrajko
+    group: "{{ owner_group }}"
     mode: 0775
 
-- name: Add a few environment variables to ~/.bashrc for user dtrajko
+- name: "Add a few environment variables to ~/.bashrc for user {{ owner_username }}"
   lineinfile:
-    path: /home/dtrajko/.bashrc
+    path: "/home/{{ owner_username }}/.bashrc"
     line: "{{ item.line }}"
     backup: yes
     state: present

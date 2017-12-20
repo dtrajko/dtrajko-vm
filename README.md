@@ -1,4 +1,4 @@
-# dtrajko-vm
+# {{ VM_HOSTNAME }}
 A web development virtual machine based on Vagrant / VirtualBox / Ansible
 
 
@@ -51,16 +51,16 @@ Running the Dev VM
 - Install Vagrant plugins (vagrant-hostsupdater, vagrant-vbguest)
 - Edit Vagrantfile if default settings are not suitable
 - Run 'vagrant up'
-- Configure SSH for user 'dtrajko' (more defaults in the "SSH as user 'dtrajko'" section)
-- SSH as user 'dtrajko'
+- Configure SSH for user '{{ VM_OWNER_USERNAME }}' (more defaults in the "SSH as user '{{ VM_OWNER_USERNAME }}'" section)
+- SSH as user '{{ VM_OWNER_USERNAME }}'
 
 
 User Accounts
 -----------------------------------
 Developer should use the following account to work in virtual machine:
 
-username: 'dtrajko'
-password: 'dtrajko' (or use the ssh private key instead)
+username: '{{ VM_OWNER_USERNAME }}'
+password: '{{ VM_OWNER_PASSWORD }}' (or use the ssh private key instead)
 
 Vagrant user:
 username: 'vagrant'
@@ -76,11 +76,11 @@ username: 'root'
 password: 'vagrant' (or use 'sudo su')
 
 
-SSH as user 'dtrajko'
+SSH as user '{{ VM_OWNER_USERNAME }}'
 -----------------------------------
-SSH as dtrajko should be done without the password, with the private SSH key without the passphrase.
-Public key already exists in VM for use dtrajko, while the private key can be found in provisioning/roles/users/files/ssh/id_rsa (OpenSSH RSA key)
-The private key should be used in SSH client to login as dtrajko without the password nor passphrase.
+SSH as '{{ VM_OWNER_USERNAME }}' should be done without the password, with the private SSH key without the passphrase.
+Public key already exists in VM for use '{{ VM_OWNER_USERNAME }}', while the private key can be found in provisioning/roles/users/files/ssh/id_rsa (OpenSSH RSA key)
+The private key should be used in SSH client to login as '{{ VM_OWNER_USERNAME }}' without the password nor passphrase.
 In PuTTY, try with the pre-generated provisioning/roles/users/files/ssh/id_rsa.ppk or use PuTTYgen to generate a new PuTTY private key based
 on the existing OpenSSH provisioning/roles/users/files/ssh/id_rsa
 
@@ -89,14 +89,14 @@ SSH as user 'vagrant'
 -----------------------------------
 User 'vagrant' can login to VM with password 'vagrant'
 User 'vagrant' should be used only for special purposes, it's not for a daily use.
-For daily work on projects login as 'dtrajko'.
+For daily work on projects login as '{{ VM_OWNER_USERNAME }}'.
 
 
 The codebase
 -----------------------------------
-By default, /home/dtrajko/workspace is shared on host OS via samba on \\DTRAJKO-VM\workspace
+By default, '/home/{{ VM_OWNER_USERNAME }}/workspace' is shared on host OS via samba on \\{{ VM_HOSTNAME }}\workspace
 Alternatively, the code can be shared by using virtualbox shared folders in Vagrantfile:
-config.vm.synced_folder "../../workspace", "/home/dtrajko/workspace",
+config.vm.synced_folder '../../workspace', '/home/{{ VM_HOSTNAME }}/workspace',
 
 Make sure that synced folder for the code is on a different path than "/vagrant" synced folder,
 to avoid issues with svn and other problems.
@@ -145,8 +145,8 @@ MySQL server
 -----------------------------------
 host: 192.168.XXX.XXX (VM_IP variable in Vagrantfile)
 port: 3306
-user: dtrajko
-pass: dtrajko
+user: '{{ VM_OWNER_USERNAME }}'
+pass: '{{ VM_OWNER_PASSWORD }}'
 
 
 phpMyAdmin
@@ -154,7 +154,7 @@ phpMyAdmin
 phpMyAdmin is available on following hosts:
 
 phpmyadmin.localhost
-phpmyadmin.dtrajko-vm
+phpmyadmin.{{ VM_HOSTNAME }}
 
 
 Aliases
@@ -165,11 +165,11 @@ N/A (TODO)
 Vagrant
 -----------------------------------
 Dev VM is prepared based on Vagrant specifications, so it can be exported to Vagrant box
-vagrant package --base dtrajko-vm --output dtrajko-vm.box
+vagrant package --base {{ VM_HOSTNAME }} --output {{ VM_HOSTNAME }}.box
 
 and used through vagrant:
-vagrant box add dtrajko-vm /path/to/vagrant/boxes/dtrajko-vm.box
-vagrant init dtrajko-vm
+vagrant box add {{ VM_HOSTNAME }} /path/to/vagrant/boxes/{{ VM_HOSTNAME }}.box
+vagrant init {{ VM_HOSTNAME }}
 vagrant up
 
 Dev VM contains two network adapters

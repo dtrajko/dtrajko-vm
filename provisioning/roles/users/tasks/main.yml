@@ -1,7 +1,7 @@
 ---
-- name: create dtrajko group
+- name: "create {{ owner_group }} group"
   group:
-    name: dtrajko
+    name: "{{ owner_group }}"
     gid: "{{ gid_start }}"
     state: present
 - name: create apache group
@@ -9,25 +9,30 @@
     name: apache
     gid: "{{ gid_start + 4 }}"
     state: present
+- name: create nginx group
+  group:
+    name: nginx
+    gid: "{{ gid_start + 8 }}"
+    state: present
 - name: create memcached group
   group:
     name: memcached
-    gid: "{{ gid_start + 8 }}"
+    gid: "{{ gid_start + 12 }}"
     state: present
 - name: create mysql group
   group:
     name: mysql
-    gid: "{{ gid_start + 12 }}"
+    gid: "{{ gid_start + 16 }}"
     state: present
-- name: create user dtrajko
+- name: "create user {{ owner_username }}"
   user:
-    name: dtrajko
+    name: "{{ owner_username }}"
     uid: "{{ uid_start }}"
-    group: dtrajko
+    group: "{{ owner_group }}"
     groups:
       - apache
       - vagrant
-    home: /home/dtrajko
+    home: "/home/{{ owner_username }}"
     state: present
 - name: create user apache
   user:
@@ -35,7 +40,7 @@
     uid: "{{ uid_start + 4 }}"
     group: apache
     groups:
-      - dtrajko
+      - "{{ owner_group }}"
     shell: /sbin/nologin
     state: present
 - name: create user nginx
@@ -44,14 +49,14 @@
     uid: "{{ uid_start + 8 }}"
     group: nginx
     groups:
-      - dtrajko
+      - "{{ owner_group }}"
     shell: /sbin/nologin
     state: present
 - name: create user beanstalkd
   user:
     name: beanstalkd
     uid: "{{ uid_start + 12 }}"
-    group: dtrajko
+    group: "{{ owner_group }}"
     home: /home/beanstalkd
     shell: /sbin/nologin
     state: present
@@ -69,7 +74,7 @@
     group: mysql
     shell: /sbin/nologin
     state: present
-- name: Add users vagrant and dtrajko to sudoers, no password required 
+- name: "Add users vagrant and {{ owner_username }} to sudoers, no password required"
   lineinfile:
     path: /etc/sudoers
     line: "{{ item.line }}"
@@ -77,37 +82,37 @@
     state: present
     insertafter: EOF
   with_items:
-    - { line: '' }
-    - { line: 'vagrant  ALL=(ALL)  NOPASSWD:ALL' }
-    - { line: 'dtrajko  ALL=(ALL)  NOPASSWD:ALL' }
+    - { line: "" }
+    - { line: "vagrant  ALL=(ALL)  NOPASSWD:ALL" }
+    - { line: "{{ owner_username }}  ALL=(ALL)  NOPASSWD:ALL" }
 
-- name: 'Create dir /home/dtrajko/.ssh'
+- name: "Create dir /home/{{ owner_username }}/.ssh"
   file:
-    path: /home/dtrajko/.ssh
+    path: "/home/{{ owner_username }}/.ssh"
     state: directory
-    owner: dtrajko
-    group: dtrajko
+    owner: "{{ owner_username }}"
+    group: "{{ owner_group }}"
     mode: 0700
 
-- name: Add public key for user dtrajko
+- name: "Add public key for user {{ owner_username }}"
   copy:
     src: files/ssh/id_rsa.pub
-    dest: /home/dtrajko/.ssh/id_rsa.pub
-    owner: dtrajko
-    group: dtrajko
+    dest: "/home/{{ owner_username }}/.ssh/id_rsa.pub"
+    owner: "{{ owner_username }}"
+    group: "{{ owner_group }}"
     mode: 0600
 
-- name: Set authorized key for user dtrajko
+- name: "Set authorized key for user {{ owner_username }}"
   authorized_key:
-    user: dtrajko
+    user: "{{ owner_username }}"
     state: present
     key: "{{ lookup('file', 'files/ssh/id_rsa.pub') }}"
 
 - name: Set the proper SSH permissions for the authorized_keys file
   file:
-    path: /home/dtrajko/.ssh/authorized_keys
-    owner: dtrajko
-    group: dtrajko
+    path: "/home/{{ owner_username }}/.ssh/authorized_keys"
+    owner: "{{ owner_username }}"
+    group: "{{ owner_group }}"
     mode: 0600
 
 - name: Set a password for user 'root'
@@ -119,11 +124,11 @@
   become: true
   become_user: root
 
-- name: Set a password for user 'dtrajko'
+- name: "Set a password for user '{{ owner_username }}'"
   expect:
-    command: passwd dtrajko
+    command: "passwd {{ owner_username }}"
     responses:
-      "New password:": "{{ dtrajko_password }}"
-      "Retype new password:": "{{ dtrajko_password }}"
+      "New password:": "{{ vm_owner_password }}"
+      "Retype new password:": "{{ vm_owner_password }}"
   become: true
   become_user: root

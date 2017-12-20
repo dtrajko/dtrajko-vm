@@ -1,7 +1,7 @@
 ########################### AS vagrant:
-sudo su dtrajko
-ansible-playbook --limit=dtrajko-vm --inventory-file=/tmp/vagrant-ansible/inventory --sudo -v /vagrant/provisioning/playbook_subset.yml
-/usr/bin/mysql -h127.0.0.1 -udtrajko -pdtrajko database_name < /home/vagrant/vm_setup/database_name.sql
+sudo su {{ VM_OWNER_USERNAME }}
+ansible-playbook --limit={{ VM_HOSTNAME }} --inventory-file=/tmp/vagrant-ansible/inventory --sudo -v /vagrant/provisioning/playbook_subset.yml
+/usr/bin/mysql -h127.0.0.1 -u{{ VM_OWNER_USERNAME }} -p{{ VM_OWNER_PASSWORD }} database_name < /home/vagrant/vm_setup/database_name.sql
 
 ########################### AS root:
 systemctl restart nginx
@@ -12,6 +12,6 @@ systemctl restart nmb
 /usr/bin/memcached -p 11211 -u memcached -m 64 -c 1024 -l 127.0.0.1 >> /var/log/memcached.log 2>&1 &
 /usr/bin/beanstalkd -b /home/beanstalkd/beanstalkdwaldir -f 1000 -z 1048576 -u beanstalkd &
    
-########################### AS dtrajko:
+########################### AS {{ VM_OWNER_USERNAME }}:
 sudo su vagrant
 cat ~/.ssh/id_rsa.pub >> ~/.ssh/authorized_keys
