@@ -74,8 +74,8 @@
 
 - name: copy ssl domains bundle
   copy: >
-    src={{ item.ssl_domain }}.crt
-    dest=/etc/nginx/ssl/{{ item.ssl_domain }}.crt
+    src=ssl_host.crt
+    dest=/etc/nginx/ssl/ssl_host.crt
     owner={{ nginx_user }}
     group={{ nginx_user }}
     mode=644
@@ -85,8 +85,8 @@
 
 - name: copy ssl domains private key
   copy: >
-    src={{ item.ssl_domain }}.key
-    dest=/etc/nginx/ssl/{{ item.ssl_domain }}.key
+    src=ssl_host.key
+    dest=/etc/nginx/ssl/ssl_host.key
     owner={{ nginx_user }}
     group={{ nginx_user }}
     mode=644

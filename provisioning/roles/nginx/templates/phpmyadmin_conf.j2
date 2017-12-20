@@ -6,9 +6,9 @@ server {
     error_log  {{ nginx_log_dir }}/phpmyadmin.error.log;
     access_log {{ nginx_log_dir }}/phpmyadmin.access.log main;
 
-    ssl_certificate             {{ nginx_basedir }}/ssl/{{ vm_hostname }}.crt;
-    ssl_certificate_key         {{ nginx_basedir }}/ssl/{{ vm_hostname }}.key;
-    ssl_trusted_certificate     {{ nginx_basedir }}/ssl/{{ vm_hostname }}.crt;
+    ssl_certificate             {{ nginx_basedir }}/ssl/ssl_host.crt;
+    ssl_certificate_key         {{ nginx_basedir }}/ssl/ssl_host.key;
+    ssl_trusted_certificate     {{ nginx_basedir }}/ssl/ssl_host.crt;
 
 	include ssl_common.conf;
 

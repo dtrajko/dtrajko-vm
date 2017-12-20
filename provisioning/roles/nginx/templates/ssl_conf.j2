@@ -1,6 +1,6 @@
   # load SSL certs
-  ssl_certificate     ssl/{{ item.ssl_domain }}.crt;
-  ssl_certificate_key ssl/{{ item.ssl_domain }}.key;
+  ssl_certificate     ssl/ssl_host.crt;
+  ssl_certificate_key ssl/ssl_host.key;
 
   # enable session resumption - http://goo.gl/RnJHZ4
   ssl_session_cache   shared:SSL:10m;
